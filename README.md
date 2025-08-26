@@ -1,45 +1,162 @@
-# PokeSolution
+# CentroPokemon ⚡🧬
+
+API RESTful para gerenciamento e monitoramento de Pokémons, desenvolvida com **.NET** e **Entity Framework Core**, utilizando banco de dados Oracle e integração com PokéAPI externa.
+
+---
+
+## ✅ Funcionalidades
+
+- CRUD de Pokémons  
+- Consulta de Pokémons na PokéAPI externa  
+- Classificação de saúde dos Pokémons  
+- Documentação automática da API via OpenAPI (Swagger)  
+
+---
+
+## 📌 Endpoints Principais
+
+### 🧬 Pokémons
+
+- `GET /api/pokemons` — Lista todos os Pokémons  
+- `GET /api/pokemons/{id}` — Detalha um Pokémon  
+- `POST /api/pokemons` — Cria um novo Pokémon  
+- `PUT /api/pokemons/{id}` — Atualiza um Pokémon  
+- `DELETE /api/pokemons/{id}` — Remove um Pokémon  
+- `GET /api/pokemons/external/{name}` — Consulta dados na PokéAPI e salva/atualiza localmente  
+
+---
+
+## 📖 Documentação da API - Swagger (OpenAPI)
+
+- Acesse `/swagger` após executar a aplicação  
+- Interface interativa para testar endpoints  
+- Visualização de modelos, parâmetros e respostas  
+
+---
+
+## 🗂️ Estrutura do Projeto
+
+- `Application`: Serviços, contratos e integração com PokéAPI  
+- `Domain`: Entidades de domínio e interfaces de repositório  
+- `Infrastructure`: EF Core, Migrations e Contexto  
+- `WebApiBanco`: Controllers, configuração e Swagger  
+- `MvcApp`: Front-end Razor
+
+---
+
+## 🚀 Como Executar
+
+### Pré-requisitos
+
+- .NET SDK  
+- Banco de dados Oracle  
+- Git
+
+### Passos
+
+```bash
+git clone https://github.com/AdonayRocha/CentroPokemon.git
+cd CentroPokemon
+```
+
+```bash
+cd WebApiBanco
+dotnet ef database update --project ../Infrastructure/Infrastructure.csproj --startup-project .
+dotnet run
+```
+
+Acesse no navegador: [https://localhost:7143/swagger](https://localhost:7143/swagger)
+
+---
+
+## 📊 Diagrama de Classes
 
 ```mermaid
-graph TD
-    subgraph Application
-        AC1(IPokeApiClient)
-        AC2(PokeApiClient)
-        AC3(PokemonService)
-        AC4(PokemonDto)
-        AC5(PokeApiModels)
-    end
+classDiagram
+    direction TB
+    class PokemonManaged {
+        +int Id
+        +int ExternalId
+        +string Name
+        +string TypesCsv
+        +int BaseHp
+        +HealthStatus Health
+    }
 
-    subgraph Domain
-        DC1(PokemonManaged)
-        DC2(HealthStatus)
-        DR1(IPokemonRepository)
-    end
+    class HealthStatus {
+        <<enum>>
+        Ruim
+        Media
+        Saudavel
+    }
 
-    subgraph Infrastructure
-        IDC1(PokemonDbContext)
-        IR1(PokemonRepository)
-    end
+    class PokemonDbContext {
+        +DbSet~PokemonManaged~ Pokemons
+    }
 
-    subgraph MvcApp
-        MVC1[Controllers]
-        MVC2[Models]
-        MVC3[Views]
-    end
+    class IPokeApiClient {
+        +Task~PokeApiPokemon?~ GetPokemonAsync(string, CancellationToken)
+    }
 
-    AC3 --> AC1
-    AC1 <--> AC2
-    AC3 --> DR1
-    DR1 <--> IR1
-    IR1 --> IDC1
-    AC3 --> AC4
-    AC3 --> AC5
+    class PokeApiClient {
+        -HttpClient _httpClient
+        +Task~PokeApiPokemon?~ GetPokemonAsync(string, CancellationToken)
+    }
 
-    DC1 --> DC2
-    IR1 --> DC1
-    IR1 --> DR1
+    class IPokemonRepository {
+        +Task~PokemonManaged?~ GetByIdAsync(int)
+        +Task~PokemonManaged?~ GetByNameAsync(string)
+        +Task AddAsync(PokemonManaged)
+        +Task UpdateAsync(PokemonManaged)
+        +Task DeleteAsync(int)
+        +Task~IReadOnlyList~ ListAsync()
+    }
 
-    MVC1 --> AC3
-    MVC2 --> DC1
-    MVC3 --> MVC1
+    class PokemonRepository {
+        -PokemonDbContext _ctx
+        +... // métodos implementados
+    }
+
+    class PokemonService {
+        -IPokeApiClient _pokeApi
+        -IPokemonRepository _repo
+        +Task~PokemonManaged~ CreateOrUpdateFromExternalAsync(string, CancellationToken)
+        +HealthStatus ClassifyHealth(int)
+    }
+
+    class PokemonsController {
+        +GetAll()
+        +GetById(int)
+        +Create(PokemonDto)
+        +Update(int, PokemonDto)
+        +Delete(int)
+        +GetFromExternalApi(string)
+    }
+
+    PokeApiClient ..|> IPokeApiClient
+    PokemonRepository ..|> IPokemonRepository
+    PokemonService --> IPokeApiClient
+    PokemonService --> IPokemonRepository
+    PokemonService --> PokemonManaged
+    PokemonsController --> PokemonService
+    PokemonDbContext --> PokemonManaged
+    PokemonManaged --> HealthStatus
 ```
+
+---
+
+## 🛠 Tecnologias Utilizadas
+
+- .NET / ASP.NET Core  
+- Entity Framework Core  
+- Oracle Database  
+- Swagger / Swashbuckle  
+- C#  
+- Razor Pages  
+- JavaScript / CSS  
+
+---
+
+## 📄 Licença
+
+Este projeto está sob a [MIT License](LICENSE).
