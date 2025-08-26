@@ -5,15 +5,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Application.DTOs;
+using Application.Contracts; 
 
 namespace WebApiPokemon.Controllers
 {
-    public interface IPokeApiClient
-    {
-        Task<PokeApiPokemon?> GetPokemonAsync(string nameOrId, CancellationToken ct = default);
-    }
-
-    public class PokeApiClient : IPokeApiClient
+    public class PokeApiClient : IPokeApiClient 
     {
         private readonly HttpClient _httpClient;
         private readonly ILogger<PokeApiClient> _logger;

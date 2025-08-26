@@ -1,17 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-
 using Domain.Entities;
-namespace Domain.Repositories;
-public interface IPokemonRepository
+
+namespace Domain.Repositories
 {
-    Task<PokemonManaged?> GetByIdAsync(int id);
-    Task<PokemonManaged?> GetByNameAsync(string name);
-    Task AddAsync(PokemonManaged entity);
-    Task UpdateAsync(PokemonManaged entity);
-    Task DeleteAsync(int id);
-    Task<IReadOnlyList<PokemonManaged>> ListAsync();
+    public interface IPokemonRepository
+    {
+        Task<IEnumerable<PokemonManaged>> GetAllAsync();
+        Task<PokemonManaged?> GetByIdAsync(int id);
+        Task AddAsync(PokemonManaged pokemon);
+        Task UpdateAsync(PokemonManaged pokemon);
+        Task DeleteAsync(PokemonManaged pokemon); 
+    }
+
 }
